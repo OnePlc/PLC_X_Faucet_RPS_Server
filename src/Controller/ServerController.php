@@ -113,6 +113,7 @@ class ServerController extends CoreEntityController
                     $oHost = $oUserTbl->getSingle($oGame->host_user_idfs);
                     $oGame->oEnemy = (object)['id' => $oHost->getID(),'name' => $oHost->getLabel()];
                 }
+                $oGame->sTimeSince = ServerController::timeElapsedString($oGame->date_matched);
                 $aRecentGames[] = $oGame;
             }
         }
@@ -389,6 +390,7 @@ class ServerController extends CoreEntityController
                     $oHost = $oUserTbl->getSingle($oGame->host_user_idfs);
                     $oGame->oEnemy = (object)['id' => $oHost->getID(),'name' => $oHost->getLabel()];
                 }
+                $oGame->sTimeSince = ServerController::timeElapsedString($oGame->date_created);
                 $aSessions[] = $oGame;
             }
         }
@@ -654,5 +656,34 @@ class ServerController extends CoreEntityController
         }
 
         return $this->redirect()->toRoute('faucet-games', ['action' => 'rockpaperscissors']);
+    }
+
+    public static function timeElapsedString($datetime, $full = false) {
+        $now = new \DateTime;
+        $ago = new \DateTime($datetime);
+        $diff = $now->diff($ago);
+
+        $diff->w = floor($diff->d / 7);
+        $diff->d -= $diff->w * 7;
+
+        $string = array(
+            'y' => 'year',
+            'm' => 'month',
+            'w' => 'week',
+            'd' => 'day',
+            'h' => 'hour',
+            'i' => 'minute',
+            's' => 'second',
+        );
+        foreach ($string as $k => &$v) {
+            if ($diff->$k) {
+                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+            } else {
+                unset($string[$k]);
+            }
+        }
+
+        if (!$full) $string = array_slice($string, 0, 1);
+        return $string ? implode(', ', $string) . ' ago' : 'just now';
     }
 }
