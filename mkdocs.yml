@@ -1,0 +1,10 @@
+docs_dir: docs/book
+site_dir: docs/html
+nav:
+  - Home: index.md
+site_name: oneplace-event
+site_description: "onePlace Faucet RPS Server"
+repo_url: 'https://github.com/OnePlc/PLC_X_Faucet_RPSServer'
+theme: bootstrap4
+extra:
+  project: onePlc
