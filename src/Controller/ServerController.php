@@ -227,6 +227,7 @@ class ServerController extends CoreEntityController
             $sResult = 'even';
             $sMeEmote = '';
             $sHostEmote = '';
+            $iWinnerID = 0;
             if($iClientVote == 1) {
                 $sMeEmote = '🗿 Rock';
                 if($oSession->host_vote == 1) {
@@ -235,29 +236,35 @@ class ServerController extends CoreEntityController
                 } elseif ($oSession->host_vote == 2) {
                     $sHostEmote = '📝️️️ Paper';
                     $sResult = 'lost';
+                    $iWinnerID = $oSession->host_user_idfs;
                 } elseif ($oSession->host_vote == 3) {
                     $sHostEmote = '✂️ Scissors';
                     $sResult = 'won';
+                    $iWinnerID = $iClientID;
                 }
             } elseif($iClientVote == 2) {
                 $sMeEmote = '📝️️️ Paper';
                 if($oSession->host_vote == 1) {
                     $sHostEmote = '🗿 Rock';
                     $sResult = 'won';
+                    $iWinnerID = $iClientID;
                 } elseif ($oSession->host_vote == 2) {
                     $sHostEmote = '📝️️️ Paper';
                 } elseif ($oSession->host_vote == 3) {
                     $sHostEmote = '✂️ Scissors';
                     $sResult = 'lost';
+                    $iWinnerID = $oSession->host_user_idfs;
                 }
             } elseif($iClientVote == 3) {
                 $sMeEmote = '✂️ Scissors';
                 if($oSession->host_vote == 1) {
                     $sHostEmote = '🗿 Rock';
                     $sResult = 'lost';
+                    $iWinnerID = $oSession->host_user_idfs;
                 } elseif ($oSession->host_vote == 2) {
                     $sHostEmote = '📝️️️ Paper';
                     $sResult = 'won';
+                    $iWinnerID = $iClientID;
                 } elseif ($oSession->host_vote == 3) {
                     $sHostEmote = '✂️ Scissors';
                 }
@@ -265,7 +272,7 @@ class ServerController extends CoreEntityController
 
             $aMatchData = [
                 'client_vote' => $iClientVote,
-                'winner_idfs' => ($sResult == 'lost') ? $oSession->host_user_idfs : ($sResult == 'even') ? 0 : $iClientID,
+                'winner_idfs' => $iWinnerID,
                 'date_matched' => date('Y-m-d H:i:s', time()),
             ];
             if($oSession->client_user_idfs == 0) {
