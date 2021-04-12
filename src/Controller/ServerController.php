@@ -221,6 +221,10 @@ class ServerController extends CoreEntityController
             //$oClientUser = $oUserTbl->select(['User_ID' => $oSession->client_user_idfs]);
             $oClientUser = $oUsrServ->getSingle($iClientID);
             $oHostUser = $oUsrServ->getSingle($oSession->host_user_idfs);
+
+            if($oSession->amount_bet > $oClientUser->token_balance) {
+                return 'clientbalancetoosmall';
+            }
             /**
              * Determine Winner
              */
