@@ -297,14 +297,14 @@ class ServerController extends CoreEntityController
                             'chat_id' => $oClientUser->telegram_chatid,
                             'text' => "the game vs ".$oHostUser->username." is even - ".$sMeEmote.' VS '.$sHostEmote.' # +0 Coins ',
                         ];
-                        TelegramController::sendTelegramMessage($aMessage);
+                        ServerController::sendTelegramMessage($aMessage);
                     } else {
                         $sMePre = ($sResult == 'won') ? '+' : '-';
                         $aMessage = [
                             'chat_id' => $oClientUser->telegram_chatid,
                             'text' => "You have ".$sResult." the game vs ".$oHostUser->username." - ".$sMeEmote.' VS '.$sHostEmote.' # '.$sMePre.number_format((float)$oSession->amount_bet,2,'.','\'').' Coins ',
                         ];
-                        TelegramController::sendTelegramMessage($aMessage);
+                        ServerController::sendTelegramMessage($aMessage);
                     }
                 }
             }
@@ -316,7 +316,7 @@ class ServerController extends CoreEntityController
                             'chat_id' => $oHostUser->telegram_chatid,
                             'text' => "the game vs ".$oClientUser->username." is even - ".$sHostEmote.' VS '.$sMeEmote.' # +0 Coins ',
                         ];
-                        TelegramController::sendTelegramMessage($aMessage);
+                        ServerController::sendTelegramMessage($aMessage);
                     } else {
                         $sHostResult = ($sResult == 'won') ? 'lost' : 'won';
                         $sHostPre = ($sResult == 'won') ? '-' : '+';
@@ -324,7 +324,7 @@ class ServerController extends CoreEntityController
                             'chat_id' => $oHostUser->telegram_chatid,
                             'text' => "You have ".$sHostResult." the game vs ".$oClientUser->username." - ".$sHostEmote.' VS '.$sMeEmote.' # '.$sHostPre.number_format((float)$oSession->amount_bet,2,'.','\'').' Coins ',
                         ];
-                        TelegramController::sendTelegramMessage($aMessage);
+                        ServerController::sendTelegramMessage($aMessage);
                     }
                 }
             }
@@ -621,14 +621,14 @@ class ServerController extends CoreEntityController
                         'chat_id' => $oMe->telegram_chatid,
                         'text' => "the game vs ".$oHost->getLabel()." is even - ".$sMeEmote.' VS '.$sHostEmote.' # +0 Coins ',
                     ];
-                    TelegramController::sendTelegramMessage($aMessage);
+                    ServerController::sendTelegramMessage($aMessage);
                 } else {
                     $sMePre = ($sResult == 'won') ? '+' : '-';
                     $aMessage = [
                         'chat_id' => $oMe->telegram_chatid,
                         'text' => "You have ".$sResult." the game vs ".$oHost->getLabel()." - ".$sMeEmote.' VS '.$sHostEmote.' # '.$sMePre.number_format((float)$oSessionOpen->amount_bet,2,'.','\'').' Coins ',
                     ];
-                    TelegramController::sendTelegramMessage($aMessage);
+                    ServerController::sendTelegramMessage($aMessage);
                 }
             }
             if($oHost->telegram_chatid != '' && $oHost->getSetting('tgbot-gamenotifications') == 'on') {
@@ -637,7 +637,7 @@ class ServerController extends CoreEntityController
                         'chat_id' => $oHost->telegram_chatid,
                         'text' => "the game vs ".$oMe->getLabel()." is even - ".$sHostEmote.' VS '.$sMeEmote.' # +0 Coins ',
                     ];
-                    TelegramController::sendTelegramMessage($aMessage);
+                    ServerController::sendTelegramMessage($aMessage);
                 } else {
                     $sHostResult = ($sResult == 'won') ? 'lost' : 'won';
                     $sHostPre = ($sResult == 'won') ? '-' : '+';
@@ -645,7 +645,7 @@ class ServerController extends CoreEntityController
                         'chat_id' => $oHost->telegram_chatid,
                         'text' => "You have ".$sHostResult." the game vs ".$oMe->getLabel()." - ".$sHostEmote.' VS '.$sMeEmote.' # '.$sHostPre.number_format((float)$oSessionOpen->amount_bet,2,'.','\'').' Coins ',
                     ];
-                    TelegramController::sendTelegramMessage($aMessage);
+                    ServerController::sendTelegramMessage($aMessage);
                 }
             }
 
@@ -685,5 +685,23 @@ class ServerController extends CoreEntityController
 
         if (!$full) $string = array_slice($string, 0, 1);
         return $string ? implode(', ', $string) . ' ago' : 'just now';
+    }
+
+    private static function sendTelegramMessage($aContent)
+    {
+        $sToken = CoreEntityController::$aGlobalSettings['tgbot-token'];
+        $ch = curl_init();
+        $url="https://api.telegram.org/bot$sToken/SendMessage";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($aContent));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        // receive server response ...
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $server_output = curl_exec ($ch);
+        curl_close ($ch);
     }
 }
