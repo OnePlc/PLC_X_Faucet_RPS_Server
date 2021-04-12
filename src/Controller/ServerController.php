@@ -64,6 +64,38 @@ class ServerController extends CoreEntityController
         }
     }
 
+    /**
+     * RPS Live Stats
+     *
+     * Get open Games for User and globally
+     *
+     * @param false $oUser
+     * @return array
+     * @since 1.0.2
+     */
+    public static function getRPSLiveStats($oUser = false) {
+        $iMyGames = 0;
+        $iTotalGames = 0;
+
+        $oSessionsTbl = new TableGateway('faucet_game_match', CoreEntityController::$oDbAdapter);
+        $iTotalGames = $oSessionsTbl->select([
+            'client_user_idfs' => 0,
+            'active' => 1,
+        ])->count();
+        if($oUser) {
+            $iMyGames = $oSessionsTbl->select([
+                'host_user_idfs' => $oUser->getID(),
+                'client_user_idfs' => 0,
+                'active' => 1,
+            ])->count();
+        }
+
+        return [
+            'iTotalGames' => $iTotalGames,
+            'iMyGames' => $iMyGames,
+        ];
+    }
+
     public static function cancelRPSGame($oUser, $iMatchID) {
         $oSessionsTbl = new TableGateway('faucet_game_match', CoreEntityController::$oDbAdapter);
 
@@ -75,6 +107,13 @@ class ServerController extends CoreEntityController
 
         if(count($oOpenGame) > 0) {
             if(is_numeric($iMatchID) && $iMatchID != 0 && $iMatchID != '') {
+                $oMatch = ServerController::loadRPSGame($iMatchID);
+                # give back bet to host who already paid
+                $oUserTbl = new TableGateway('user', CoreEntityController::$oDbAdapter);
+                $fCurrentBalance = $oUserTbl->select(['User_ID' => $oUser->getID()])->current()->token_balance;
+                $oUserTbl->update([
+                    'token_balance' => $fCurrentBalance+$oMatch->amount_bet,
+                ],'User_ID = '.$oUser->getID());
                 $oSessionsTbl->delete(['Match_ID' => $iMatchID]);
             }
             return true;
