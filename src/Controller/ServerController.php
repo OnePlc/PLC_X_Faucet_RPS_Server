@@ -441,8 +441,10 @@ class ServerController extends CoreEntityController
                     $oGame->oEnemy = (object)['id' => $oHost->getID(),'name' => $oHost->getLabel()];
                 }
                 $oGame->sTimeSince = ServerController::timeElapsedString($oGame->date_created);
-                # Overwrite Host Vote to hide it in API
-                $oGame->host_vote = 0;
+                if($sRole != 'host') {
+                    # Overwrite Host Vote to hide it in API
+                    $oGame->host_vote = 0;
+                }
                 $aSessions[] = $oGame;
             }
         }
