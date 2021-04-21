@@ -210,7 +210,7 @@ class ServerController extends CoreEntityController
         return $aReturn;
     }
 
-    public static function matchRPSGame($iMatchID, $iClientVote, $iClientID = 0) {
+    public static function matchRPSGame($iMatchID, $iClientVote, $iClientID = 0,$sPlattform = 'api') {
         $oSessionsTbl = new TableGateway('faucet_game_match', CoreEntityController::$oDbAdapter);
         $oUserTbl = new TableGateway('user', CoreEntityController::$oDbAdapter);
         $oUsrServ = CoreEntityController::$oServiceManager->get(\OnePlace\User\Model\UserTable::class);
@@ -276,6 +276,7 @@ class ServerController extends CoreEntityController
 
             $aMatchData = [
                 'client_vote' => $iClientVote,
+                'plattform_client' => $sPlattform,
                 'winner_idfs' => $iWinnerID,
                 'date_matched' => date('Y-m-d H:i:s', time()),
             ];
@@ -388,7 +389,7 @@ class ServerController extends CoreEntityController
         }
     }
 
-    public static function joinRPSGame($iMatchID, $iClientID, $iVote = 0) {
+    public static function joinRPSGame($iMatchID, $iClientID, $iVote = 0, $sPlattform = 'api') {
         $oSessionsTbl = new TableGateway('faucet_game_match', CoreEntityController::$oDbAdapter);
 
         $oWh = new Where();
@@ -404,6 +405,7 @@ class ServerController extends CoreEntityController
             ];
             if($iVote != 0) {
                 $aData['client_vote'] = $iVote;
+                $aData['plattform_client'] = $sPlattform;
             }
             $oSessionsTbl->update($aData,'Match_ID = '.$iMatchID);
 
@@ -452,7 +454,7 @@ class ServerController extends CoreEntityController
         return $aSessions;
     }
 
-    public static function startRPSGame($iVote,$fBet,$oUser)
+    public static function startRPSGame($iVote,$fBet,$oUser,$sPlatform = 'api')
     {
         if($fBet < 0) {
             $fBet = 0-$fBet;
@@ -495,6 +497,7 @@ class ServerController extends CoreEntityController
                     'date_created' => date('Y-m-d H:i:s', time()),
                     'date_matched' => '0000-00-00 00:00:00',
                     'host_vote' => $iVote,
+                    'plattform_host' => $sPlatform,
                     'client_vote' => 0,
                     'amount_bet' => (float)$fBet,
                     'auto_match' => $iAutoMatch,
@@ -504,6 +507,7 @@ class ServerController extends CoreEntityController
                 $oSessionsTbl->update([
                     'host_vote' => $iVote,
                     'active' => 1,
+                    'plattform_host' => 'telegram',
                 ],'Match_ID = '.$oOpenGame->Match_ID);
             }
 
